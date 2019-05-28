@@ -1,0 +1,355 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif
+//Autor Michal Kostera. program tworzy i srotuje liste pracowsnikow
+
+void wait( int seconds )
+{   // Pretty crossplatform, both ALL POSIX compliant systems AND Windows
+    #ifdef _WIN32
+        Sleep( 1000 * seconds );
+    #else
+        sleep( seconds );
+    #endif
+}
+void czysc()
+{
+#ifdef _WIN32
+	system("cls");
+#else
+	printf("\033[H\033[J");
+#endif
+}
+
+int count=0;
+struct SERIAL
+{
+    int value;
+    struct SERIAL* pp;
+};
+struct WORKER
+{
+
+    char surname[32];
+    int salary;
+    int serial;
+    struct WORKER* link;
+
+};
+struct DEPAR
+{   char name[32];
+    struct DEPAR* next;
+    struct WORKER* beg;
+    int full;
+
+};
+struct DEPAR* root=NULL;
+struct SERIAL* check=NULL;
+void addDEP();
+int addWORKER(struct DEPAR *H);
+int delDEP(struct DEPAR *H);
+
+
+int main()
+{
+int ison=0;
+int op=0;
+while(ison==0)
+{   czysc();
+    printf("wybierz jedna z podanych opcji\n");
+    printf("1.Dodaj nowy katalog\n");
+    printf("2.Usun katalog wraz z zawartoscia\n");
+    printf("3.Dodaj pracownika\n");
+    printf("4.modyfikuj dane pracwonika\n");
+    printf("5.wyszukaj pracownika\n");
+    printf("6.Wyswietl wszystkie katalogi\n");
+    printf("7.Wyswietl zawartosc katalogu\n");
+    printf("8.Wczytaj dane z pliku\n");
+    printf("9.Zapisz dane do pliku\n");
+    printf("10.Wyjdz z programu\n");
+    scanf("%d",&op);
+    while (getchar() != '\n');
+    switch (op)
+    {
+    case 1://dodaj katalog
+    czysc();
+    addDEP();
+    break;
+
+     case 2://usun katalog z zawartoscia
+czysc();
+    delDEP(root);
+
+    break;
+
+     case 3://dodaj pracownika
+czysc();
+addWORKER(root);
+    break;
+
+     case 4://modyfikuj dane pracownika
+czysc();
+    break;
+
+     case 5://szukaj
+czysc();
+    break;
+
+     case 6://wyswietl wszystkie katalogi
+czysc();
+    break;
+
+     case 7://wyswietl zawartosc katalogu
+czysc();
+    break;
+     case 8://wczytaj z pliku
+czysc();
+    break;
+
+     case 9://zapisz do pliku
+czysc();
+    break;
+    case 10://wyjdz z programu
+czysc();
+    break;
+     default:
+         printf("bledny wybor, wybierz jescze raz\n");
+         scanf("%d",&op);
+         while (getchar() != '\n');
+        break;
+    }
+
+}
+return 0;
+}
+int addWORKER(struct DEPAR *H)
+{
+    int a=0;
+    int b=0;
+    int i=0;
+    int c=1;
+    struct DEPAR* temp;
+    struct SERIAL* semp;//do sprawdzania czy dany nr sie nie pwotorzyl
+    semp=(struct SERIAL*)malloc(sizeof(struct SERIAL*));
+    temp=H;
+    if(H==NULL)
+    {
+        printf("brak dzialow. Wroc do menu \n glownego zeby dodac dzial\n");
+        return 0;
+    }
+    else
+    {
+    while(temp->next!=NULL)
+    {   printf("%d.",a+1);
+        puts(temp->name);
+        printf("\n");
+        temp=temp->next;
+        a++;
+    }
+    printf("%d.",a+1);
+    puts(temp->name);
+    a++;
+    }
+
+    printf("wybierz dzial\n");
+    scanf("%d",&b);
+    while (getchar() != '\n');
+    while(b>a||b<0)
+    {
+        printf("Nieprawidlowa opcja,\n wybierz dzial\n");
+        scanf("%d",&b);
+        while (getchar() != '\n');
+    }
+    temp=H;
+    /* while(i<=b)
+    {
+        temp=temp->next;
+        i++;
+    }*/
+    for(i=1;i<b;i++)//sprawdzic kolejnosc
+    {
+        temp=temp->next;
+    }
+    struct WORKER* bemp;
+    bemp=(struct WORKER*)malloc(sizeof(struct WORKER));
+
+    printf("podaj nazwisko i imie pracownika\n");
+    gets(bemp->surname);
+
+    printf("podaj pensje pracownika\n");
+    scanf("%d",&bemp->salary);
+    while (getchar() != '\n');
+
+    printf("podaj numer seryjny  pracownika\n");
+    scanf("%d",&bemp->serial);
+    while (getchar() != '\n');
+
+    semp->value=bemp->serial;
+    semp->pp=NULL;
+
+    if(check==NULL)
+    {
+        check=semp;
+        printf("test190\n");
+    }
+    else
+   {   struct SERIAL* checker;//do sprawdzania listy SERIAL
+       int d;
+       while(checker->pp!=NULL)
+        {
+        checker=check;
+        d=0;
+        while(checker->pp!=NULL&&d==0)
+        {
+            if(semp->value==checker->value)
+            {
+                printf("podany nr juz istnieje wpisz inny\n");
+                scanf("%d",&bemp->serial);
+                while (getchar() != '\n');
+                semp->value=bemp->serial;
+                d=1;
+            }
+            else
+            {
+                checker=checker->pp;
+            }
+
+        }
+
+
+    }
+    checker->pp=semp;
+    }
+   printf("sprwadzam\n");
+   if(temp->beg==NULL)
+   {    printf("utworzono\n");
+       temp->beg=bemp;
+       temp->full++;
+       wait(1);
+   }
+
+   else{
+        printf("dodaje\n");
+       struct WORKER* p;
+            p=temp->beg;
+            if(p->link==NULL)
+            {
+                p->link=bemp;
+            }
+            else
+            {
+                while(p->link!=NULL)
+                {
+                p=p->link;
+                }
+
+            }
+            p->link=bemp;
+            temp->full++;
+            wait(1);
+            return 1;
+    }
+return 1;
+}
+void addDEP()
+{
+    struct DEPAR* temp;
+    temp=(struct DEPAR*)malloc(sizeof(struct DEPAR));
+    printf("Podaj nazwe dzialu\n");
+    gets(temp->name);
+    /*printf("podaj nazwe dzialu");
+    scanf("%s",&temp->name);//sprawdzic*/
+    temp->next=NULL;
+    temp->beg=NULL;
+    temp->full=0;
+        if(root==NULL)
+        {
+            root=temp;
+        }
+        else
+        {
+            struct DEPAR* p;
+            p=root;
+            while(p->next!=NULL)
+            {
+                p=p->next;
+            }
+            p->next=temp;
+
+        }
+count++;
+}
+int delDEP(struct DEPAR *H)
+{
+    char choice[32];
+    int a=1;
+    int b=0;
+    int i=0;
+    struct DEPAR* q;//do przechowywawnia Adresu jeden wstecz wzgledem aktualnego przy usuwaniu
+    printf("wybierz katalog do usunięcia, przy wpisywaniu zachowaj wielkosc znakow\n");
+    struct DEPAR* temp;
+    temp=H;
+    if(H==NULL)
+    {
+        printf("Brak dzialow. Wroc do menu  glownego zeby dodac dzial\n");
+        return 0;
+    }
+    else
+    {
+
+       do
+        {   puts(temp->name);
+            printf("\n");
+            temp=temp->next;
+            b++;
+        }while(temp!=NULL);
+    }
+    gets(choice);
+    temp=H;
+    q=H;
+      for(i=0;i<b;i++)
+      {
+          a=strcmp(choice,temp->name);
+          if(a==0)
+          {
+              printf("znaleziony dzial to %s\n",temp->name);
+              struct WORKER* p;
+              while(temp->beg!=NULL)
+                  { p=temp->beg;
+                if(p->link==NULL)
+                  {
+                      temp->beg==NULL;
+                      free(p);
+                      break;
+                  }
+
+                  temp->beg=p->link;
+                  p->link=NULL;
+                  free(p);
+                  }
+                q->next=temp->next;
+                temp->next=NULL;
+                free(temp);
+              i=b;
+              printf("usunieto katalog %s wraz zawartoscia\n",choice);
+
+          }
+          else
+          {   q=temp;
+              temp=temp->next;
+          }
+      }
+      if(a!=0)
+      {
+          printf("Nie znalezniono podanego dzialu, upewnij sie ze wpisales poprawnie dane\n");
+          return 0;
+      }
+
+return 1;
+}
+
+
